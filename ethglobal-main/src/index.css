@@ -1,0 +1,68 @@
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:wght@200;300;400;700&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Override RainbowKit button to look more like ours */
+.connect-button button {
+  border-radius: 0.375rem !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace !important;
+}
+
+.gradient-text {
+  background: linear-gradient(
+    90deg,
+    #ba7ecf 2.9%,
+    #f19ed0 23.1%,
+    #948df2 44.99%,
+    #b9c2ff 75.22%,
+    #fbcea5 101.86%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+@layer utilities {
+  .gradient-text {
+    background: linear-gradient(
+      90deg,
+      #ba7ecf 2.9%,
+      #f19ed0 23.1%,
+      #948df2 44.99%,
+      #b9c2ff 75.22%,
+      #fbcea5 101.86%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+  }
+}
+
+@keyframes horizontal-shaking {
+  0% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(5px);
+  }
+
+  50% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.horizontal-shake {
+  animation: horizontal-shaking 0.25s;
+  animation-iteration-count: 1;
+}
