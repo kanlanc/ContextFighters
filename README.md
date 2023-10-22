@@ -3,6 +3,8 @@ This is created by the same team as Makermeet who are Haran, Amy, Vibha and Vikr
 
 ## Demo URL
 
+If your unable to hear the sound, please checkout the captions. Different watchers have reported different outcomes and we did not have time to narrow down on this sound issue
+
 https://www.loom.com/share/242e7bab3e254953b944666d155f8159?sid=3a8bbae2-d399-4e79-8302-61a53c126065
 
 
