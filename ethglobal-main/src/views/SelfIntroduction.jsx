@@ -36,97 +36,107 @@ const categories = [
 //   );
 // };
 
-const RoleSelectComponent = (props) => {
-  const { selectedRole, setSelectedRole } = props;
-  const navigate = useNavigate();
-  const client = useClient();
-  const base_url = "http://127.0.0.1:5000";
-
-  useEffect(() => {
-    const getMatch = async () => {
-      try {
-        const response = await axios.get(`${base_url}/user/${client.address}`);
-        console.log(response.data);
-        navigate("/curatedmeet");
-      } catch (e) {
-        console.log(e);
-      }
-    };
-    getMatch();
-  }, []);
-  const handleCardClick = (role) => {
-    console.log(selectedRole);
-    setSelectedRole(role);
-  };
-
+const FlattenedDataTable = ({ flattenedData }) => {
   return (
-    <div className="flex flex-wrap justify-between p-10 items-center rounded-lg border border-gray-300 ">
-      {[
-        {
-          title: "Graphic Designer",
-          image: "./graphic-design.png",
-        },
-        {
-          title: "Illustrator",
-          image: "./flag-garland.svg",
-        },
-        {
-          title: "Animator",
-          image: "./flash-circle-1.svg",
-        },
-        {
-          title: "UI/UX",
-          image: "./interface-ui-layout-app.svg",
-        },
-        {
-          title: "Web Design",
-          image: "./page.svg",
-        },
-      ].map((object, index) => (
-        <div
-          key={index}
-          onClick={() => handleCardClick(object.title)}
-          className={`transition-all duration-500 cursor-pointer ease-out bg-white bg-opacity-0 flex flex-col w-30 h-34 items-center ml-5 rounded-lg card p-3 ${
-            selectedRole === object.title ? "bg-opacity-100 shadow-md " : ""
-          }`}
-        >
-          <img
-            src={`./${object.image}`}
-            alt={object.title}
-            className="w-24 h-24 mb-2"
-          />
-          <div className="text-center">{object.title}</div>
-        </div>
-      ))}
+    <div className="mt-6 flex flex-col gap-5">
+      <div className="">
+        <table className="min-w-full">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Wallet Address</th>
+              <th>Profile Bio</th>
+            </tr>
+          </thead>
+          <tbody>
+            {flattenedData.map((item, index) => (
+              <tr key={index}>
+                <td>{item.profileName}</td>
+                <td>{item.walletAddress}</td>
+                <td>{item.profileBio}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+     
     </div>
   );
 };
+
 
 const SelfIntroduction = () => {
   const [selectedRole, setSelectedRole] = useState(null);
   const [interest, setInterest] = useState([]);
   const [bio, setBio] = useState("");
   const [query, setQuery] = useState("");
+  const [showResults, setShowResults]= useState(false);
+  let [flattenedData,setFlattenedData] = useState([])
   const client = useClient();
   const base_url = "http://127.0.0.1:5000";
+
+  
+  
 
   const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = {
-      
       query,
       wallet_address: client.address,
     };
     try {
       console.log(formData);
-      const response = await axios.post(`${base_url}/users/new`, formData);
-      if (response.status === 200) {
-        console.log("Form submitted successfully", response.data);
-        navigate("/curatedmeet");
-      } else {
-        console.log("Error submitting form", response.status, response);
+      
+      // const response = await axios.post(`${base_url}/users/new`, formData);
+      if(true){
+        setShowResults(true);
+        setFlattenedData([
+          {
+            "profileName": "tamrat.lens",
+            "profileBio": "Crypto enthusiast and DeFi explorer.",
+            "walletAddress": "0x8f96aa1c4cbd3b10786c81031c6917bcac66423c"
+          },
+          {
+            "profileName": "anddao.lens",
+            "profileBio": "Blockchain developer specializing in smart contracts.",
+            "walletAddress": "0x88a769db5055b046c9a45db621978bbec65c8c5b"
+          },
+          {
+            "profileName": "damarnez.lens",
+            "profileBio": "Digital artist with a focus on NFTs.",
+            "walletAddress": "0x88a769db5055b046c9a45db621978bbec65c8c5b"
+          },
+          {
+            "profileName": "stani.lens",
+            "profileBio": "Finance expert diving into decentralized platforms.",
+            "walletAddress": "0x7241dddec3a6af367882eaf9651b87e1c7549dff"
+          },
+          {
+            "profileName": "lilgho.lens",
+            "profileBio": "Aspiring trader and crypto community member.",
+            "walletAddress": "0x7241dddec3a6af367882eaf9651b87e1c7549dff"
+          },
+          {
+            "profileName": "lensofficial.lens",
+            "profileBio": "Official account for all things Lens.",
+            "walletAddress": "0x7241dddec3a6af367882eaf9651b87e1c7549dff"
+          },
+          {
+            "profileName": "dydymoon.lens",
+            "profileBio": "Gamer turned crypto miner, exploring new opportunities.",
+            "walletAddress": "0x806346b423ddb4727c1f5dc718886430aa7ce9cf"
+          }
+        ])
+       
       }
+      // if (response.status === 200) {
+      //   console.log("Form submitted successfully", response.data);
+      //   // navigate("/curatedmeet");
+      //   setShowResults(true);
+      // } else {
+      //   console.log("Error submitting form", response.status, response);
+      // }
     } catch (error) {
       console.log("Network error", error);
     }
@@ -151,7 +161,17 @@ const SelfIntroduction = () => {
           </div>
         </div>
       </form>
+
+
+     { showResults ? (
+    <div className="mt-6 flex flex-col gap-5">
+      <FlattenedDataTable flattenedData={flattenedData} />
     </div>
+  ) : null}
+
+  </div>
+
+      
   );
 };
 

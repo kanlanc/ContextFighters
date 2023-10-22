@@ -46,6 +46,102 @@ def save_user_data(data):
 def home():
     return "Welcome to our SocialConnect app!!!!!!"
 
+@app.route("/find/matches", methods=["POST", "OPTIONS"])
+@cross_origin(origin="*")
+def add_user():
+    try:
+        # Parse the JSON data from the request body
+        request_data = request.get_json()
+        print(request_data)
+
+        # Extract data from the JSON
+        wallet_address = request_data.get("wallet_address")
+        xmtp_enabled = request_data.get("xmtp_enabled")
+        query = request_data.get("query")
+        api_key = '1f928d8e9e224eb3bc7a6bb474b208cf'
+        api_client = AirstackClient(api_key=api_key)
+
+        
+        query_boolean = """
+        query MyQuery($identity: Identity) {
+        Socials
+        (
+          input: {filter: {identity: {_eq: $identity}}, blockchain: ethereum}
+        ) {
+        Social {
+          profileName
+          profileBio
+          dappName
+          followings(input: {filter: {dappName: {_eq: lens}}}) {
+            Following {
+              followingProfileId
+              followingAddress {
+                socials(input: {filter: {dappName: {_eq: lens}}}) {
+                  profileBio
+                  dappName
+                  profileName
+                  userAddress
+                  userAssociatedAddresses
+                }
+              }
+            }
+          }
+          followers(input: {filter: {dappName: {_eq: lens}}}) {
+            Follower {
+              followerProfileId
+              followerAddress {
+                socials(input: {filter: {dappName: {_eq: lens}}}) {
+                  profileBio
+                  dappName
+                  profileName
+                  userAddress
+                  userAssociatedAddresses
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+        
+        """
+
+        variables = {
+          "identity": username
+        }
+
+        execute_query_client = api_client.create_execute_query_object(query=query_boolean, variables=variables)
+        query_response = await execute_query_client.execute_paginated_query()
+
+        data = json.dumps(query_response.data)
+
+        data=str(data)
+        response_data = json.loads(data)
+
+        flattened_data = [
+          {
+              "name": social["profileName"],
+              "walletAddress": address,
+              "profileBio": social["profileBio"]
+          }
+          for social in response_data["data"]["Socials"]["Social"]
+          for following in social["followings"]["Following"]
+          for address in following["followingAddress"]["socials"][0]["userAssociatedAddresses"]
+          if social["profileBio"]
+      ]
+
+        # Now send this to openAI
+
+        df = pd.DataFrame(flattened_data)
+        result = main_function(user_query=user_query, user_connections_list=df)
+
+        return jsonify({"data": result, "error": query_response.error})
+
+        except Exception as e:
+            return jsonify({"error": str(e)})
+
+
+
 
 @app.route('/match/<username>', methods=['GET'])
 async def match(username):
