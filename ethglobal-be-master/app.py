@@ -3,6 +3,7 @@ import asyncio
 from airstack.execute_query import AirstackClient
 import json
 from flask_cors import CORS, cross_origin
+from useful_connections import main_function
 
 app = Flask(__name__)
 # cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -10,7 +11,7 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 
-api_key = "79e3eca0cf014235987ecef6b4e38090"
+api_key = "1f928d8e9e224eb3bc7a6bb474b208cf"
 DB_FILE = "user_data1.json"
 # def load_user_data():
 #     try:
@@ -45,50 +46,143 @@ def save_user_data(data):
 def home():
     return "Welcome to our SocialConnect app!!!!!!"
 
+
 @app.route('/match/<username>', methods=['GET'])
 async def match(username):
-    api_key = '79e3eca0cf014235987ecef6b4e38090'
+    api_key = '1f928d8e9e224eb3bc7a6bb474b208cf'
     api_client = AirstackClient(api_key=api_key)
 
-    matched_to=["henri.lens",
-"pussyriotxyz.lens",
-"marenaltman.lens",
-"salti.lens",
-"rachb.lens",
-"mylene.lens",
-"salti.lens"
-"gregcardo.lens",
-"edwardtay.lens",
-"polmaire.lens",
-"larryscruff.lens"
-]
-
-    query_boolean = """query MyQuery($username2: Identity) {
-  TokenBalances(
-    input: {filter: {owner: {_eq: "salti.lens"}, tokenType: {_eq: ERC20}}, blockchain: polygon}
-  ) {
-    TokenBalance {
-      token {
-        tokenBalances(
-          input: {filter: {owner: {_eq: $username2}, tokenType: {_eq: ERC20}}}
-        ) {
-          id
-          token {
-            address
-            symbol
-            name
-            owner {
-              identity
+    
+    query_boolean = """
+    query MyQuery($identity: Identity) {
+    Socials
+    (
+      input: {filter: {identity: {_eq: $identity}}, blockchain: ethereum}
+    ) {
+    Social {
+      profileName
+      profileBio
+      dappName
+      followings(input: {filter: {dappName: {_eq: lens}}}) {
+        Following {
+          followingProfileId
+          followingAddress {
+            socials(input: {filter: {dappName: {_eq: lens}}}) {
+              profileBio
+              dappName
+              profileName
+              userAddress
+              userAssociatedAddresses
             }
           }
         }
       }
-      owner {
-        blockchain
+      followers(input: {filter: {dappName: {_eq: lens}}}) {
+        Follower {
+          followerProfileId
+          followerAddress {
+            socials(input: {filter: {dappName: {_eq: lens}}}) {
+              profileBio
+              dappName
+              profileName
+              userAddress
+              userAssociatedAddresses
+            }
+          }
+        }
       }
     }
   }
-}"""
+}
+    
+    """
+
+    variables = {
+      "identity": username
+    }
+
+    execute_query_client = api_client.create_execute_query_object(query=query_boolean, variables=variables)
+    query_response = await execute_query_client.execute_paginated_query()
+
+    data = json.dumps(query_response.data)
+
+    data=str(data)
+    response_data = json.loads(data)
+
+    flattened_data = [
+      {
+          "name": social["profileName"],
+          "walletAddress": address,
+          "profileBio": social["profileBio"]
+      }
+      for social in response_data["data"]["Socials"]["Social"]
+      for following in social["followings"]["Following"]
+      for address in following["followingAddress"]["socials"][0]["userAssociatedAddresses"]
+      if social["profileBio"]
+  ]
+
+    # Now send this to openAI
+
+    df = pd.read_csv("app/enriched_linkedin_data_connections.csv")
+    result = main_function(user_query=user_query, user_connections_list=df)
+
+    # return jsonify({"data": json.dumps(simplified_data, indent=2), "error": query_response.error})
+    # return jsonify({"data": res[0], "error": query_response.error})
+
+
+
+
+
+        
+
+        
+
+
+
+@app.route('/v1/match/<username>', methods=['GET'])
+async def match1(username):
+    api_key = '1f928d8e9e224eb3bc7a6bb474b208cf'
+    api_client = AirstackClient(api_key=api_key)
+
+    matched_to=["henri.lens",
+    "pussyriotxyz.lens",
+    "marenaltman.lens",
+    "salti.lens",
+    "rachb.lens",
+    "mylene.lens",
+    "salti.lens"
+    "gregcardo.lens",
+    "edwardtay.lens",
+    "polmaire.lens",
+    "larryscruff.lens"
+    ]
+
+    query_boolean = """query MyQuery($username2: Identity) {
+      TokenBalances(
+        input: {filter: {owner: {_eq: "salti.lens"}, tokenType: {_eq: ERC20}}, blockchain: polygon}
+      ) {
+        TokenBalance {
+          token {
+            tokenBalances(
+              input: {filter: {owner: {_eq: $username2}, tokenType: {_eq: ERC20}}}
+            ) {
+              id
+              token {
+                address
+                symbol
+                name
+                owner {
+                  identity
+                }
+              }
+            }
+          }
+          owner {
+            blockchain
+          }
+        }
+      }
+    }"""
     res = []
     for i in matched_to:
         # print(i)
@@ -106,7 +200,7 @@ async def match(username):
         response_data = json.loads(data)
         
 
-# Access the "identity" field
+        # Access the "identity" field
         identity = None  # Default value if not found
         try:
             # new_data = json.loads(response_data["data"])
@@ -193,7 +287,7 @@ def get_user(wallet_address):
 
 @app.route("/checkXMTPEnabled/<address>", methods=["GET"])
 async def checkXMTP(address):
-    api_key = "79e3eca0cf014235987ecef6b4e38090"
+    api_key = "1f928d8e9e224eb3bc7a6bb474b208cf"
     api_client = AirstackClient(api_key=api_key)
 
     query_boolean = """query MyQuery($address: Identity ) {
@@ -224,7 +318,7 @@ async def checkXMTP(address):
 
 @app.route("/checkXMTPLens/<address>", methods=["GET"])
 async def checkXMTPLens(address):
-    api_key = "79e3eca0cf014235987ecef6b4e38090"
+    api_key = "1f928d8e9e224eb3bc7a6bb474b208cf"
     api_client = AirstackClient(api_key=api_key)
 
     query_boolean = """query MyQuery($address: Identity) {
@@ -257,7 +351,7 @@ async def checkXMTPLens(address):
 
 @app.route("/getXMTPenabledAddresses", methods=["GET"])
 async def execute_query():
-    api_key = "79e3eca0cf014235987ecef6b4e38090"
+    api_key = "1f928d8e9e224eb3bc7a6bb474b208cf"
     api_client = AirstackClient(api_key=api_key)
 
     queryBulk = """query BulkFetchPrimaryENSandXMTP($address: [Identity!]) {
