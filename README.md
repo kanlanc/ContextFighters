@@ -20,3 +20,8 @@ We couldn't upload them due to server issues and hence we am uploading here.
 ![CF5](./cf5.jpg)
 
 
+## Future Work
+
+Incorporating this tech stack
+
+![image](https://github.com/kanlanc/ContextFighters/assets/20688709/f0fcc6b3-35c9-471b-ae19-ff63a8a6aa24)
